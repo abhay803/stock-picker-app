@@ -1,0 +1,16 @@
+// constants
+$black: #000000;
+
+.base-input {
+  position: relative;
+
+  label {
+    color: $black;
+    margin-right: 0.5rem;
+  }
+
+  input {
+    padding: 0.5rem;
+    max-width: 200px;
+  }
+}

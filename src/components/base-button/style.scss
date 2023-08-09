@@ -1,0 +1,14 @@
+$btn-grey: #555555;
+
+.base-btn {
+  cursor: pointer;
+  background-color: $btn-grey;
+  border: none;
+  color: white;
+  padding: 0.5rem;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 1rem;
+  width: 5rem;
+}

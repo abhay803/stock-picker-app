@@ -1,0 +1,5 @@
+export { default as BaseButton } from './base-button/index'
+export { default as BaseLoader } from './base-loader/index'
+export { default as BaseInput } from './base-input/index'
+export { default as BaseList } from './base-list/index'
+export { default as BasePagination } from './base-pagination/index'
