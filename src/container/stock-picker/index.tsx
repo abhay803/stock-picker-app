@@ -1,7 +1,13 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import debounce from 'lodash.debounce'
 
-import { BaseInput, BaseButton, BaseList, BaseLoader } from '../../components/'
+import {
+  BaseInput,
+  BaseButton,
+  BaseList,
+  BaseLoader,
+  NoResult,
+} from '../../components/'
 import { getRequest } from '../../utils/axios-util'
 import { BASE_URL, DEBOUNCE_TIME, searchOptions } from '../constant'
 
@@ -12,6 +18,7 @@ const StockPicker: React.FC<IStockPicker> = ({ clickHandler }) => {
   const [searchTxt, setSearchTxt] = useState('')
   const [list, setList] = useState([])
   const [isLoad, setIsLoad] = useState(false)
+  const [isError, setIsError] = useState(false)
 
   const PickerMap: any = {}
 
@@ -30,17 +37,30 @@ const StockPicker: React.FC<IStockPicker> = ({ clickHandler }) => {
 
       searchOptions.params.keywords = inputTxt
       setIsLoad(true)
+      setIsError(false)
       getRequest(BASE_URL, searchOptions).then(
         (res) => {
-          const tempList = res.data?.bestMatches.map(
-            (item: any) => item['1. symbol']
-          )
+          try {
+            if (res.data['Information']) throw new Error('New API is required')
 
-          setList(tempList)
-          PickerMap[searchTxt] = tempList
-          setIsLoad(false)
+            const tempList = res.data?.bestMatches.map(
+              (item: any) => item['1. symbol']
+            )
+
+            setList(tempList)
+            PickerMap[searchTxt] = tempList
+            setIsLoad(false)
+          } catch (err) {
+            console.error('Picker API Response is missing contract', err)
+            setIsError(true)
+            setIsLoad(false)
+          }
         },
-        (err) => console.error(err)
+        (err) => {
+          console.error('Picker API Error Response', err)
+          setIsError(true)
+          setIsLoad(false)
+        }
       )
     }, DEBOUNCE_TIME),
     []
@@ -96,7 +116,9 @@ const StockPicker: React.FC<IStockPicker> = ({ clickHandler }) => {
           </div>
         )}
       </div>
-      {!list.length ? null : (
+      {isError && <NoResult message="Stock not found " />}
+      {isLoad && null}
+      {!!list.length && (
         <div className="list-content" onClick={itemClickHandler}>
           {getListView()}
         </div>

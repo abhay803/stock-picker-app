@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-import { BasePagination } from '../../components'
+import { BasePagination, NoResult } from '../../components'
 import { BASE_URL, overviewOptions } from '../constant'
 import { getRequest } from '../../utils/axios-util'
 
@@ -11,8 +11,12 @@ import './style.scss'
 const StockDetails: React.FC<IStockDetails> = ({ stockQuery }) => {
   const [stockData, setStockData] = useState(mock)
   const [isLoad, setIsLoad] = useState(true)
+  const [isError, setIsError] = useState(false)
+  const [currIdx, setCurrIdx] = useState(0)
+  const [range, setRange] = useState(0)
 
   const DetailsMap: any = {} // Component level caching
+  const ResultStack: Array<string> = []
 
   const getStockDetails = () => {
     if (!stockQuery) return // page load
@@ -24,23 +28,49 @@ const StockDetails: React.FC<IStockDetails> = ({ stockQuery }) => {
 
     overviewOptions.params.symbol = stockQuery
     setIsLoad(true)
+    setIsError(false)
     getRequest(BASE_URL, overviewOptions).then(
       (res) => {
-        const { data } = res
-        if (Object.keys(data).length > 0) {
-          setStockData(data)
-          DetailsMap[stockQuery] = data
+        try {
+          const { data } = res
+          if (res.data['Information']) throw new Error('New API is required')
+
+          if (Object.keys(data).length > 0) {
+            setStockData(data)
+            DetailsMap[stockQuery] = data
+            ResultStack.push(stockQuery)
+            setIsLoad(false)
+          }
+        } catch (err) {
+          console.error('Overview API response is missing contract', err)
+          setIsError(true)
           setIsLoad(false)
         }
       },
-      (err) => console.error(err)
+      (err) => {
+        console.error('Overview API error response', err)
+        setIsError(true)
+        setIsLoad(false)
+      }
     )
   }
 
   useEffect(getStockDetails, [stockQuery])
 
-  const getNoResult = () => {
-    return <p className="no-result">No Results found !!!</p>
+  useEffect(() => {
+    const len = ResultStack.length
+
+    setRange(len)
+  }, [ResultStack.length])
+
+  const paginationClickHandler = (type: string) => {
+    if (type === 'left') {
+      setCurrIdx(currIdx - 1)
+    }
+
+    if (type === 'right') {
+      setCurrIdx(currIdx + 1)
+    }
   }
 
   const stockDetailView = () => {
@@ -87,8 +117,14 @@ const StockDetails: React.FC<IStockDetails> = ({ stockQuery }) => {
 
   return (
     <div className="stock-details">
-      <BasePagination left={false} right={true} />
-      {!isLoad ? stockDetailView() : getNoResult()}
+      <BasePagination
+        current={currIdx}
+        range={range}
+        clickHandler={paginationClickHandler}
+      />
+      {isLoad && null}
+      {!isLoad && stockDetailView()}
+      {isError && <NoResult message="Stock details not found" />}
     </div>
   )
 }

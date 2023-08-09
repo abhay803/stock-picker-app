@@ -1,4 +1,5 @@
 export interface IPagination {
-  left: Boolean
-  right: Boolean
+  current: number
+  range: number
+  clickHandler: Function
 }
