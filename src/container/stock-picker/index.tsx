@@ -3,22 +3,28 @@ import debounce from 'lodash.debounce'
 
 import { BaseInput, BaseButton, BaseList, BaseLoader } from '../../components/'
 import { getRequest } from '../../utils/axios-util'
+import { BASE_URL, DEBOUNCE_TIME, searchOptions } from '../constant'
 
-import { BASE_URL, DEBOUNCE_TIME, searchOptions } from './constant'
+import { IStockPicker } from './interface'
 import './style.scss'
 
-const StockPicker: React.FC<{ clickHandler: Function }> = ({
-  clickHandler,
-}) => {
+const StockPicker: React.FC<IStockPicker> = ({ clickHandler }) => {
   const [searchTxt, setSearchTxt] = useState('')
   const [list, setList] = useState([])
   const [isLoad, setIsLoad] = useState(false)
+
+  const PickerMap: any = {}
 
   const debounceChangeHandler = useCallback(
     debounce((inputTxt: string) => {
       if (!inputTxt) {
         //TODO: set no content found
         setList([])
+        return
+      }
+
+      if (PickerMap[searchTxt]) {
+        setList(PickerMap[searchTxt])
         return
       }
 
@@ -29,9 +35,9 @@ const StockPicker: React.FC<{ clickHandler: Function }> = ({
           const tempList = res.data?.bestMatches.map(
             (item: any) => item['1. symbol']
           )
-          console.log(tempList)
 
           setList(tempList)
+          PickerMap[searchTxt] = tempList
           setIsLoad(false)
         },
         (err) => console.error(err)

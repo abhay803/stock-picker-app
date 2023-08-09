@@ -1,6 +1,8 @@
 import React from 'react'
 
-const BasePagination: React.FC = () => {
+import { IPagination } from './interface'
+
+const BasePagination: React.FC<IPagination> = (left, right) => {
   return <></>
 }
 
