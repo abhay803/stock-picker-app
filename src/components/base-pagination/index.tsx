@@ -11,7 +11,7 @@ const BasePagination: React.FC<IPagination> = ({
   return (
     <div className="page-navs">
       <button
-        disabled={current <= 1 ? true : false}
+        disabled={current < 1 ? true : false}
         onClick={() => clickHandler('left')}
       >
         Left

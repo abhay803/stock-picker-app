@@ -61,8 +61,12 @@ const StockDetails: React.FC<IStockDetails> = ({ stockQuery }) => {
 
   useEffect(() => {
     const len = detailsStack.current.length - 1
-    setStockData(DetailsMap[detailsStack.current[currIdx]])
+    setCurrIdx(len)
     setRange(len)
+  }, [detailsStack.current.length])
+
+  useEffect(() => {
+    setStockData(DetailsMap[detailsStack.current[currIdx]])
   }, [currIdx])
 
   const paginationClickHandler = (type: string) => {
