@@ -1,5 +1,5 @@
 export const BASE_URL = 'https://www.alphavantage.co/query'
-const API_KEY = '9OSSNYSEXF05IRM2'
+const API_KEY = 'AXBG5O50NGI56EIA'
 
 const serviceName = {
   overview: 'OVERVIEW',
