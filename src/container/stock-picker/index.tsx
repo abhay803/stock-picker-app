@@ -14,13 +14,13 @@ import { BASE_URL, DEBOUNCE_TIME, searchOptions } from '../constant'
 import { IStockPicker } from './interface'
 import './style.scss'
 
+const PickerMap: any = {}
+
 const StockPicker: React.FC<IStockPicker> = ({ clickHandler }) => {
   const [searchTxt, setSearchTxt] = useState('')
   const [list, setList] = useState([])
   const [isLoad, setIsLoad] = useState(false)
   const [isError, setIsError] = useState(false)
-
-  const PickerMap: any = {}
 
   const debounceChangeHandler = useCallback(
     debounce((inputTxt: string) => {
@@ -30,8 +30,8 @@ const StockPicker: React.FC<IStockPicker> = ({ clickHandler }) => {
         return
       }
 
-      if (PickerMap[searchTxt]) {
-        setList(PickerMap[searchTxt])
+      if (PickerMap[inputTxt]) {
+        setList(PickerMap[inputTxt])
         return
       }
 
@@ -48,7 +48,7 @@ const StockPicker: React.FC<IStockPicker> = ({ clickHandler }) => {
             )
 
             setList(tempList)
-            PickerMap[searchTxt] = tempList
+            PickerMap[inputTxt] = tempList
             setIsLoad(false)
           } catch (err) {
             console.error('Picker API Response is missing contract', err)
@@ -77,14 +77,15 @@ const StockPicker: React.FC<IStockPicker> = ({ clickHandler }) => {
   }
 
   const itemClickHandler = (e: any) => {
+    let symbolTxt = searchTxt
+
+    if (e && e.target.innerHTML !== 'Search') {
+      symbolTxt = e.target.innerHTML
+    }
+
+    clickHandler(symbolTxt)
     setSearchTxt('')
     setList([])
-    const symbolTxt = e.target.innerText
-    clickHandler(symbolTxt)
-  }
-
-  const getNoResult = () => {
-    return <p className="no-result">No Results found !!!</p>
   }
 
   return (
@@ -94,28 +95,22 @@ const StockPicker: React.FC<IStockPicker> = ({ clickHandler }) => {
           name="Stock Name"
           placeholderText="Enter Stock Name"
           value={searchTxt}
+          onClick={itemClickHandler}
           onChange={(e: any) => {
             const { value } = e.target
             setSearchTxt(value)
             debounceChangeHandler(value)
           }}
         />
-        {isLoad ? (
-          <div className="sd-search">
-            <BaseLoader />
-          </div>
-        ) : (
-          <div
-            className="sd-search"
-            onClick={() => {
-              console.log('Search Button api call ...')
-              return debounceChangeHandler
-            }}
-          >
-            <BaseButton btnName="Search" />
-          </div>
-        )}
+        <div className="sd-search" onClick={itemClickHandler}>
+          <BaseButton btnName="Search" />
+        </div>
       </div>
+      {isLoad ? (
+        <div className="sd-search loader-main">
+          <BaseLoader height="40vh" width="40vh" />
+        </div>
+      ) : null}
       {isError && <NoResult message="Stock not found " />}
       {isLoad && null}
       {!!list.length && (

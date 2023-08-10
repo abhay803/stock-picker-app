@@ -10,7 +10,8 @@
     margin: auto 0.5rem;
   }
 
-  .list-content {
+  .list-content,
+  .loader-main {
     max-width: 400px;
     margin: 0 auto;
   }
@@ -20,10 +21,5 @@
     overflow-y: scroll;
     border: 2px solid;
     border-radius: 5px;
-  }
-
-  .no-result {
-    padding: 1rem;
-    color: red;
   }
 }

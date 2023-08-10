@@ -2,6 +2,13 @@
   width: 80%;
   margin: 0 auto;
 
+  .no-history {
+    font-weight: 700;
+    text-align: center;
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+
   .desc-title {
     text-align: center;
     margin-bottom: 1rem;
@@ -40,9 +47,8 @@
     margin-bottom: 1rem;
   }
 
-  .no-result {
-    padding: 1rem;
-    color: red;
-    text-align: center;
+  .loader-main {
+    margin: 0 auto;
+    max-width: 60vw;
   }
 }

@@ -3,4 +3,5 @@ export interface IBaseInput {
   placeholderText: string
   value: string
   onChange: any
+  onClick: any
 }

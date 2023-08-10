@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 
-import { BasePagination, NoResult } from '../../components'
+import { BasePagination, NoResult, BaseLoader } from '../../components'
 import { BASE_URL, overviewOptions } from '../constant'
 import { getRequest } from '../../utils/axios-util'
 
@@ -8,15 +8,15 @@ import { IStockDetails } from './interface'
 import { STOCK_DETAILS_KEY, mock } from './constant'
 import './style.scss'
 
-const StockDetails: React.FC<IStockDetails> = ({ stockQuery }) => {
-  const [stockData, setStockData] = useState(mock)
-  const [isLoad, setIsLoad] = useState(true)
-  const [isError, setIsError] = useState(false)
-  const [currIdx, setCurrIdx] = useState(0)
-  const [range, setRange] = useState(0)
+const DetailsMap: any = {} // Component level caching
 
-  const DetailsMap: any = {} // Component level caching
-  const ResultStack: Array<string> = []
+const StockDetails: React.FC<IStockDetails> = ({ stockQuery }) => {
+  const [stockData, setStockData] = useState(new Object() as any)
+  const [isLoad, setIsLoad] = useState(false)
+  const [isError, setIsError] = useState(false)
+  const [currIdx, setCurrIdx] = useState(-1)
+  const [range, setRange] = useState(0)
+  const detailsStack = useRef(new Array())
 
   const getStockDetails = () => {
     if (!stockQuery) return // page load
@@ -38,7 +38,9 @@ const StockDetails: React.FC<IStockDetails> = ({ stockQuery }) => {
           if (Object.keys(data).length > 0) {
             setStockData(data)
             DetailsMap[stockQuery] = data
-            ResultStack.push(stockQuery)
+            detailsStack.current.push(stockQuery)
+            setIsLoad(false)
+          } else {
             setIsLoad(false)
           }
         } catch (err) {
@@ -58,10 +60,10 @@ const StockDetails: React.FC<IStockDetails> = ({ stockQuery }) => {
   useEffect(getStockDetails, [stockQuery])
 
   useEffect(() => {
-    const len = ResultStack.length
-
+    const len = detailsStack.current.length - 1
+    setStockData(DetailsMap[detailsStack.current[currIdx]])
     setRange(len)
-  }, [ResultStack.length])
+  }, [currIdx])
 
   const paginationClickHandler = (type: string) => {
     if (type === 'left') {
@@ -122,9 +124,16 @@ const StockDetails: React.FC<IStockDetails> = ({ stockQuery }) => {
         range={range}
         clickHandler={paginationClickHandler}
       />
-      {isLoad && null}
-      {!isLoad && stockDetailView()}
-      {isError && <NoResult message="Stock details not found" />}
+      {isLoad && (
+        <div className="loader-main">
+          <BaseLoader height="60vh" width="60vh" />
+        </div>
+      )}
+      {!isLoad && detailsStack.current.length < 1 && (
+        <p className="no-history">No search history !!!</p>
+      )}
+      {!isLoad && detailsStack.current.length > 0 && stockDetailView()}
+      {/* {isError && <NoResult message="Stock details not found" />} */}
     </div>
   )
 }

@@ -8,6 +8,7 @@ const BaseInput: React.FC<IBaseInput> = ({
   placeholderText = 'Enter some text ...',
   value,
   onChange,
+  onClick,
 }) => {
   return (
     <div className="base-input">
@@ -20,7 +21,7 @@ const BaseInput: React.FC<IBaseInput> = ({
         onKeyUp={(e) => {
           if (e.key === 'Enter') {
             console.log('Enter key api call ...')
-            onChange(e)
+            onClick()
           }
         }}
       />
